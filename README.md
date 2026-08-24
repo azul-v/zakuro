@@ -22,11 +22,21 @@ But with this tool, you don't need to worry about that. Just download your packa
 export PATH="$PATH:/home/YOUR_USER_NAME/.zakuro/bin"
 ```
 
-2. Install pipx and Zakuro:
+2. Install pipx:
 
 ```bash
 sudo apt install pipx
-pipx install zakuro
+```
+
+3. Clone the repository:
+```bash
+git clone https://github.com/azul-v/zakuro
+```
+
+4. Install Zakuro:
+
+```bash
+pipx install ./zakuro
 ```
 
 ## Usage
