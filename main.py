@@ -59,6 +59,9 @@ def install(archives: list[click.Path]) -> None:
     Install packages
 
     Specify the paths to the packages archives
+
+    All files in the 'bin' directory of the package
+    archives will be available globally
     """
 
     for archive in archives:
