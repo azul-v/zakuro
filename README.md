@@ -1,47 +1,44 @@
-# Zakuro – The Linux package manager
+# Zakuro – Linux package manager
 
-The Linux package manager that installs packages from any archives!
+✨️ Just run one command and install your software from archives! 
 
-## The story
+**Example:**
 
-Many programs are distributed using AppImage, portable archives, or single binary files. But where should you install all of this? It's usually a boring routine.
+You have: ``software_v0.0.1-stable_linux.x86_64.tar.gz``
 
-But with this tool, you don't need to worry about that. Just download your package archive and run one command!
+Then: 
 
-> [!IMPORTANT]
-> *This package manager knows nothing about dependencies because package archives are usually self-contained*
+```bash
+zakuro install ./software_v0.0.1-stable_linux.x86_64.tar.gz
+```
+
+**Done!**
 
 ## Installation
 
 > [!IMPORTANT]
 > *The installation instructions below assume the use of Debian-based Linux distributions; please adapt them for your distribution*
 
-1. Add ``/home/YOUR_USER_NAME/.zakuro/bin`` to your PATH:
+1. Find the ``.bashrc`` file in your home directory, paste the line bellow into it:
 
 ```bash
 export PATH="$PATH:/home/YOUR_USER_NAME/.zakuro/bin"
 ```
 
-2. Install pipx:
+2. Run:
 
 ```bash
 sudo apt install pipx
-```
-
-3. Clone the repository:
-```bash
 git clone https://github.com/azul-v/zakuro
-```
-
-4. Install Zakuro:
-
-```bash
 pipx install ./zakuro
 ```
 
 ## Usage
 
 The ``--help`` flag is your best friend 😉️!
+
+> [!IMPORTANT]
+> *This package manager knows nothing about dependencies because package archives are usually self-contained*
 
 ## License
 

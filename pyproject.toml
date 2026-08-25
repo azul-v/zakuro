@@ -1,7 +1,7 @@
 [project]
 name = "zakuro"
 version = "1"
-description = "The Linux package manager"
+description = "Linux package manager"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["click", "patool"]
