@@ -28,14 +28,13 @@ import patoolib
 __version__ = 1
 
 HOME = pathlib.Path().home()
-BIN_PATTERN = "bin/*"
 
 base_dir = HOME.joinpath(".zakuro")
 installed_dir = base_dir.joinpath("installed")
 bin_dir = base_dir.joinpath("bin")
 
 
-@click.group()
+@click.group(context_settings={"show_default": True})
 @click.version_option(__version__)
 @click.option("--verbose", is_flag=True)
 def main(verbose: bool) -> None:
@@ -50,19 +49,24 @@ def main(verbose: bool) -> None:
 
 @main.command()
 @click.argument(
-    "archives",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    "archives", type=click.Path(exists=True, file_okay=True, dir_okay=False),
     nargs=-1
 )
-def install(archives: list[click.Path]) -> None:
+@click.option(
+    "--executables", "-e", default="bin/*",
+    help="""
+    Unix shell-style wildcards for the location of executables in package
+    archives
+    """
+)
+def install(archives: list[click.Path], executables) -> None:
     """
     Install packages
 
     Specify the paths to the packages archives
-
-    All files in the 'bin' directory of the package
-    archives will be available globally
     """
+
+    print(executables)
 
     for archive in archives:
         installation_directory = installed_dir.joinpath(
@@ -70,7 +74,7 @@ def install(archives: list[click.Path]) -> None:
         )
         patoolib.extract_archive(str(archive), 2, str(installation_directory))
 
-        for found in installation_directory.rglob(BIN_PATTERN):
+        for found in installation_directory.rglob(executables):
             symbolic_link = bin_dir.joinpath(found.name)
             symbolic_link.symlink_to(found)
 
