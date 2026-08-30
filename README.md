@@ -1,46 +1,30 @@
-# Zakuro – Linux package manager
+<p align="center"><img src="logo.png" alt="Logo"></p>
 
-✨️ Just run one command and install your software from archives! 
+<h1 align="center" style="border-bottom: none">Zakuro</h1>
 
-**Example:**
+<p align="center" style="font-weight: bold">Package manager for portable pacakges</p>
 
-You have: ``software_v0.0.1-stable_linux.x86_64.tar.gz``
+## Features
 
-Then: 
-
-```bash
-zakuro install ./software_v0.0.1-stable_linux.x86_64.tar.gz
-```
-
-**Done!**
+- Easy to use
+- Installs portable programs from directories
+- Does not require special package configuration
 
 ## Installation
 
-> [!IMPORTANT]
-> *The installation instructions below assume the use of Debian-based Linux distributions; please adapt them for your distribution*
-
-1. Find the ``.bashrc`` file in your home directory, paste the line bellow into it:
-
-```bash
-export PATH="$PATH:/home/YOUR_USER_NAME/.zakuro/bin"
-```
-
-2. Run:
-
-```bash
-sudo apt install pipx
-git clone https://github.com/azul-v/zakuro
-pipx install ./zakuro
-```
+Download the latest release and move the executable to ``/usr/local/bin``
 
 ## Usage
 
-The ``--help`` flag is your best friend 😉️!
+Use with root privileges and explore with the ``--help`` option 😉️
 
-> [!IMPORTANT]
-> *This package manager knows nothing about dependencies because package archives are usually self-contained*
+```bash
+zakuro --help
+```
 
-## License
+## Copyright and license
+
+Copyright (c) 2026 @azul-v
 
 This project is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

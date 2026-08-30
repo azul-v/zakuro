@@ -18,110 +18,108 @@
 # General Public License along with Zakuro. If
 # not, see <https://www.gnu.org/licenses/>.
 
+import fnmatch
+import json
 import os
 import pathlib
 import shutil
+import stat
+import subprocess
 
 import click
-import patoolib
+import magic
 
 __version__ = 1
 
-HOME = pathlib.Path().home()
+DATABASE = pathlib.Path("/var/lib/zakuro/database.json")
+PACKAGES_DIR = pathlib.Path("/opt")
+BIN_DIR = pathlib.Path("/usr/bin")
+DESKTOP_DIR = pathlib.Path("/usr/share/applications")
 
-base_dir = HOME.joinpath(".zakuro")
-installed_dir = base_dir.joinpath("installed")
-bin_dir = base_dir.joinpath("bin")
+runtime_database = {}
+
+
+def write_database_changes():
+    with open(DATABASE, "w") as file:
+        json.dump(runtime_database, file)
 
 
 @click.group(context_settings={"show_default": True})
 @click.version_option(__version__)
-@click.option("--verbose", is_flag=True)
-def main(verbose: bool) -> None:
-    base_dir.mkdir(parents=True, exist_ok=True)
-    installed_dir.mkdir(exist_ok=True)
-    bin_dir.mkdir(exist_ok=True)
+def main():
+    global runtime_database
 
-    if str(bin_dir) not in os.getenv("PATH"):
-        print(f"✋️ Please add {bin_dir} to PATH")
-        return
+    DATABASE.parent.mkdir(parents=True, exist_ok=True)
 
-
-@main.command()
-@click.argument(
-    "archives", type=click.Path(exists=True, file_okay=True, dir_okay=False),
-    nargs=-1
-)
-@click.option(
-    "--executables", "-e", default="bin/*",
-    help="""
-    Unix shell-style wildcards for the location of executables in package
-    archives
-    """
-)
-def install(archives: list[click.Path], executables) -> None:
-    """
-    Install packages
-
-    Specify the paths to the packages archives
-    """
-
-    print(executables)
-
-    for archive in archives:
-        installation_directory = installed_dir.joinpath(
-            pathlib.Path(archive).name
-        )
-        patoolib.extract_archive(str(archive), 2, str(installation_directory))
-
-        for found in installation_directory.rglob(executables):
-            symbolic_link = bin_dir.joinpath(found.name)
-            symbolic_link.symlink_to(found)
-
-    print("✨️🎉️✨️ All packages installed successfully!")
+    if DATABASE.exists():
+        with open(DATABASE, "r") as file:
+            runtime_database = json.load(file)
 
 
 @main.command()
-def show() -> None:
-    """Show installed packages"""
+@click.option("--exclude", "-e", default="", help="Files to exclude from installation (Unix shell-style wildcard)")
+@click.option("--exec-mime-type", "-x", default="application/x-executable", help="Executable MIME type (Unix shell-style wildcard)")
+@click.argument("packages", type=click.Path(exists=True, file_okay=False, dir_okay=True), nargs=-1)
+def install(exclude, exec_mime_type, packages):
+    """Install package(s)"""
 
-    try:
-        next(installed_dir.iterdir())
-    except StopIteration:
-        print("You haven't installed any packages yet 🤔️")
-        return
+    global runtime_database
 
-    print("Installed packages")
+    for package in packages:
+        package = pathlib.Path(package)
+        installation_directory = PACKAGES_DIR.joinpath(package.name)
+        shutil.copytree(package, installation_directory, dirs_exist_ok=True)
 
-    for item in installed_dir.iterdir():
-        print(f"└─{item.name}")
+        if not runtime_database.get(package.name):
+            runtime_database[package.name] = []
+
+        for found in installation_directory.rglob("*"):
+            relative = found.relative_to(installation_directory)
+
+            if found.is_file() and not fnmatch.fnmatchcase(str(relative), exclude):
+                if fnmatch.fnmatchcase(magic.from_file(found, mime=True), exec_mime_type):
+                    symlink = BIN_DIR.joinpath(found.name)
+                    symlink.symlink_to(found)
+                    os.chmod(symlink, symlink.stat().st_mode | stat.S_IEXEC)
+                    runtime_database[package.name].append(str(symlink))
+                elif found.suffix == ".desktop":
+                    destination = DESKTOP_DIR.joinpath(found.name)
+                    subprocess.Popen(["desktop-file-install", "--dir", DESKTOP_DIR, found])
+                    runtime_database[package.name].append(str(destination))
+
+
+@main.command()
+def show():
+    """Show installed package(s)"""
+
+    global runtime_database
+
+    for key in runtime_database.keys():
+        click.echo(f"{key}")
 
 
 @main.command()
 @click.argument("packages", nargs=-1)
-def remove(packages: list[str]) -> None:
+def remove(packages):
     """
-    Remove packages
+    Remove package(s)
 
-    Specify the packages names from the output of the 'show' command
+    Use the package(s) name(s) from the "zakuro show" command
     """
 
-    with click.progressbar(
-        packages,
-        label="Removing packages",
-        empty_char=" ",
-        fill_char=":"
-    ) as progress:
-        for package in progress:
-            package_dir = installed_dir.joinpath(package)
-            shutil.rmtree(package_dir)
+    global runtime_database
 
-            for file in bin_dir.iterdir():
-                if file.is_symlink() and file.readlink().is_relative_to(
-                    package_dir
-                ):
-                    file.unlink()
+    for package in packages:
+        for file in runtime_database[package]:
+            pathlib.Path(file).unlink()
+
+        package_dir = PACKAGES_DIR.joinpath(package)
+        shutil.rmtree(package_dir)
+        del runtime_database[package]
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        write_database_changes()
