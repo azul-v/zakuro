@@ -36,7 +36,7 @@ PACKAGES_DIR = pathlib.Path("/opt")
 BIN_DIR = pathlib.Path("/usr/bin")
 DESKTOP_DIR = pathlib.Path("/usr/share/applications")
 
-runtime_database = {}
+runtime_database = dict()
 
 
 def write_database_changes():
@@ -71,21 +71,24 @@ def install(exclude, exec_mime_type, packages):
         shutil.copytree(package, installation_directory, dirs_exist_ok=True)
 
         if not runtime_database.get(package.name):
-            runtime_database[package.name] = []
+            runtime_database[package.name] = list()
 
         for found in installation_directory.rglob("*"):
             relative = found.relative_to(installation_directory)
 
             if found.is_file() and not fnmatch.fnmatchcase(str(relative), exclude):
+                path = None
+
                 if fnmatch.fnmatchcase(magic.from_file(found, mime=True), exec_mime_type):
-                    symlink = BIN_DIR.joinpath(found.name)
-                    symlink.symlink_to(found)
-                    os.chmod(symlink, symlink.stat().st_mode | stat.S_IEXEC)
-                    runtime_database[package.name].append(str(symlink))
+                    path = BIN_DIR.joinpath(found.name)
+                    path.symlink_to(found)
+                    os.chmod(path, path.stat().st_mode | stat.S_IEXEC)
                 elif found.suffix == ".desktop":
-                    destination = DESKTOP_DIR.joinpath(found.name)
+                    path = DESKTOP_DIR.joinpath(found.name)
                     subprocess.Popen(["desktop-file-install", "--dir", DESKTOP_DIR, found])
-                    runtime_database[package.name].append(str(destination))
+
+                if path and str(path) not in runtime_database[package.name]:
+                    runtime_database[package.name].append(str(path))
 
 
 @main.command()
@@ -95,7 +98,7 @@ def show():
     global runtime_database
 
     for key in runtime_database.keys():
-        click.echo(f"{key}")
+        click.echo(key)
 
 
 @main.command()
