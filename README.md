@@ -1,8 +1,8 @@
 <p align="center"><img src="logo.png" alt="Logo"></p>
 
-<h1 align="center" style="border-bottom: none">Zakuro</h1>
+<h1 align="center">Zakuro</h1>
 
-<p align="center" style="font-weight: bold">Package manager for portable pacakges</p>
+<p align="center">Package manager for portable pacakges</p>
 
 ## Features
 
