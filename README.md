@@ -12,7 +12,12 @@
 
 ## Installation
 
-Download [the latest release](https://github.com/azul-v/zakuro/releases/latest/download/zakuro)
+Download [the latest release](https://github.com/azul-v/zakuro/releases/latest/download/zakuro) and run:
+
+```bash
+chmod +x zakuro
+sudo mv zakuro /usr/local/bin/zakuro
+```
 
 ## Installation from source code
 
