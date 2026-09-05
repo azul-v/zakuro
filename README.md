@@ -12,7 +12,7 @@
 
 ## Installation
 
-Download the latest release
+Download [the latest release](https://github.com/azul-v/zakuro/releases/latest/download/zakuro)
 
 ## Installation from source code
 
