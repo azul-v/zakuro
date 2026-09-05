@@ -12,7 +12,7 @@
 
 ## Installation
 
-Download the latest release and move the executable to ``/usr/local/bin``
+Download the latest release
 
 ## Installation from source code
 
