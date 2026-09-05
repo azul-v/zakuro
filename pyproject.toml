@@ -10,6 +10,3 @@ dependencies = [
     "pyinstaller>=6.22.2",
     "python-magic>=0.4.27",
 ]
-
-[project.scripts]
-zakuro = "main:main"
